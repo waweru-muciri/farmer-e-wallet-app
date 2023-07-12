@@ -2,8 +2,14 @@ import { combineReducers } from 'redux';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { db } from '../firebaseConfig';
 import { doc, getDocs, deleteDoc, collection, updateDoc, addDoc } from "firebase/firestore";
-import { addAppointment, appointmentsFetchDataSuccess, deleteAppointment, editAppointment } from '../actions/actions';
-import { services, appointments } from "./reducers"
+import {
+  addTransaction, transactionsFetchDataSuccess, deleteTransaction,
+  editTransaction, editLoan, loansFetchDataSuccess, deleteWithdrawal, deleteProduct,
+  productsFetchDataSuccess, withdrawalsFetchDataSuccess, addWithdrawal, addProduct,
+  deleteAccount, accountsFetchDataSuccess, addAccount, editProduct, editAccount,
+  editWithdrawal, editDeposit, addDeposit, depositsFetchDataSuccess, deleteDeposit
+} from '../actions/actions';
+import { loans, transactions, products, withdrawals, accounts, deposits } from "./reducers"
 
 const LOGIN = 'LOGIN';
 const LOGOUT = 'LOGOUT';
@@ -35,21 +41,36 @@ function auth(state = initialAuthState, action) {
 }
 
 export function handleItemFormSubmit(data, url) {
-  if (typeof data.id === "undefined") {
-    delete data.id;
+  if (typeof data._id === "undefined") {
+    delete data._id;
   }
-  return (dispatch) => {
-    typeof data.id !== "undefined"
+  return async (dispatch) => {
+    typeof data._id !== "undefined"
       ? //send post request to edit the item
-      updateDoc(doc(db, url, data.id), data)
+      updateDoc(doc(db, url, data._id), data)
         .then((docRef) => {
           let modifiedObject = Object.assign(
             {},
             data,
           );
           switch (url) {
-            case "appointments":
-              dispatch(editAppointment(modifiedObject));
+            case "transactions":
+              dispatch(editTransaction(modifiedObject));
+              break;
+            case "loans":
+              dispatch(editLoan(modifiedObject));
+              break;
+            case "products":
+              dispatch(editProduct(modifiedObject));
+              break;
+            case "accounts":
+              dispatch(editAccount(modifiedObject));
+              break;
+            case "withdrawals":
+              dispatch(editWithdrawal(modifiedObject));
+              break;
+            case "deposits":
+              dispatch(editDeposit(modifiedObject));
               break;
           }
         })
@@ -61,11 +82,26 @@ export function handleItemFormSubmit(data, url) {
       addDoc(collection(db, url), data)
         .then((docRef) => {
           let addedItem = Object.assign({}, data, {
-            id: docRef.id,
+            _id: docRef.id,
           });
           switch (url) {
-            case "appointments":
-              dispatch(addAppointment(addedItem));
+            case "transactions":
+              dispatch(addTransaction(addedItem));
+              break;
+            case "loans":
+              dispatch(editLoan(addedItem));
+              break;
+            case "withdrawals":
+              dispatch(addWithdrawal(addedItem));
+              break;
+            case "products":
+              dispatch(addProduct(addedItem));
+              break;
+            case "accounts":
+              dispatch(addAccount(addedItem));
+              break;
+            case "deposits":
+              dispatch(addDeposit(addedItem));
               break;
           }
 
@@ -85,14 +121,29 @@ export function fetchDataFromUrl(url) {
       const fetchedItems = snapshot.docs.map((doc) => {
         const fetchedObject = Object.assign({}, doc.data(),
           {
-            id: doc.id,
+            _id: doc.id,
           }
         );
         return fetchedObject;
       });
       switch (url) {
-        case "appointments":
-          dispatch(appointmentsFetchDataSuccess(fetchedItems));
+        case "transactions":
+          dispatch(transactionsFetchDataSuccess(fetchedItems));
+          break;
+        case "loans":
+          dispatch(loansFetchDataSuccess(fetchedItems));
+          break;
+        case "withdrawals":
+          dispatch(withdrawalsFetchDataSuccess(fetchedItems));
+          break;
+        case "products":
+          dispatch(productsFetchDataSuccess(fetchedItems));
+          break;
+        case "accounts":
+          dispatch(accountsFetchDataSuccess(fetchedItems));
+          break;
+        case "deposits":
+          dispatch(depositsFetchDataSuccess(fetchedItems));
           break;
       }
     } catch (error) {
@@ -106,8 +157,23 @@ export function handleDelete(itemId, url) {
     try {
       await deleteDoc(doc(db, url, itemId))
       switch (url) {
-        case "appointments":
-          dispatch(deleteAppointment(itemId));
+        case "transactions":
+          dispatch(deleteTransaction(itemId));
+          break;
+        case "loans":
+          dispatch(editLoan(itemId));
+          break;
+        case "withdrawals":
+          dispatch(deleteWithdrawal(itemId));
+          break;
+        case "products":
+          dispatch(deleteProduct(itemId));
+          break;
+        case "accounts":
+          dispatch(deleteAccount(itemId));
+          break;
+        case "deposits":
+          dispatch(deleteDeposit(itemId));
           break;
       }
     }
@@ -119,8 +185,12 @@ export function handleDelete(itemId, url) {
 
 const AppReducer = combineReducers({
   auth,
-  appointments,
-  services
+  transactions,
+  loans,
+  products,
+  withdrawals,
+  accounts,
+  deposits,
 });
 
 export default AppReducer;

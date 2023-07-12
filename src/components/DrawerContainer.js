@@ -13,21 +13,39 @@ export default function DrawerContainer({ navigation }) {
     <View style={styles.content}>
       <View style={styles.container}>
         <MenuButton
-          title="My Appointments"
+          title="Products"
           onPress={() => {
-            navigation.navigate('Appointments Screen');
+            navigation.navigate('Products Screen');
           }}
         />
         <MenuButton
-          title="Bookings"
+          title="Transactions"
           onPress={() => {
-                navigation.navigate('Bookings Screen');
+            navigation.navigate('Transactions Screen');
           }}
         />
         <MenuButton
-          title="Reviews"
+          title="Savings"
           onPress={() => {
-                navigation.navigate('Reviews Screen');
+                navigation.navigate('Savings Screen');
+          }}
+        />
+        <MenuButton
+          title="Loans"
+          onPress={() => {
+                navigation.navigate('Loans Screen');
+          }}
+        />
+        <MenuButton
+          title="Withdrawals"
+          onPress={() => {
+                navigation.navigate('Withdrawals Screen');
+          }}
+        />
+        <MenuButton
+          title="Profile"
+          onPress={() => {
+                navigation.navigate('Profile Screen');
           }}
         />
         <MenuButton

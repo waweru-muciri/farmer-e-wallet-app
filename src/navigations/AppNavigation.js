@@ -3,15 +3,23 @@ import {Image, Pressable, StyleSheet} from 'react-native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
-import AppointmentsScreen from '../screens/AppointmentsScreen';
-import AppointmentInputScreen from '../screens/AppointmentInputScreen';
+import TransactionsScreen from '../screens/TransactionsScreen';
+import TransactionInputScreen from '../screens/TransactionInputScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import {AppIcon, AppStyles} from '../AppStyles';
-import {Configuration} from '../Configuration';
 import DrawerContainer from '../components/DrawerContainer';
+import LoansScreen from '../screens/LoansScreen';
+import LoanInputForm from '../screens/LoanInputForm';
+import WithdrawalsScreen from '../screens/WithdrawalsScreen';
+import WithdrawalsInputScreen from '../screens/WithdrawalsInputScreen';
+import ProductsScreen from '../screens/ProductsScreen';
+import AccountInputScreen from '../screens/AccountInputScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import SavingsScreen from '../screens/SavingsScreen';
+import SavingsInputScreen from '../screens/SavingsInputScreen';
 
 const Stack = createStackNavigator();
 
@@ -52,12 +60,48 @@ const HomeStack = () => (
       })}
     />
     <Stack.Screen
-      name="Appointments Screen"
-      component={AppointmentsScreen}
+      name="Transactions Screen"
+      component={TransactionsScreen}
     />
     <Stack.Screen
-      name="AppointmentInputScreen"
-      component={AppointmentInputScreen}
+      name="Loans Screen"
+      component={LoansScreen}
+    />
+    <Stack.Screen
+      name="Products Screen"
+      component={ProductsScreen}
+    />
+    <Stack.Screen
+      name="Profile Screen"
+      component={ProfileScreen}
+    />
+    <Stack.Screen
+      name="AccountInputScreen"
+      component={AccountInputScreen}
+    />
+    <Stack.Screen
+      name="Withdrawals Screen"
+      component={WithdrawalsScreen}
+    />
+    <Stack.Screen
+      name="WithdrawalInputScreen"
+      component={WithdrawalsInputScreen}
+    />
+    <Stack.Screen
+      name="LoanInputScreen"
+      component={LoanInputForm}
+    />
+    <Stack.Screen
+      name="Savings Screen"
+      component={SavingsScreen}
+    />
+    <Stack.Screen
+      name="SavingsInputScreen"
+      component={SavingsInputScreen}
+    />
+    <Stack.Screen
+      name="TransactionInputScreen"
+      component={TransactionInputScreen}
     />
   </Stack.Navigator>
 );

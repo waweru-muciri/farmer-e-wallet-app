@@ -1,11 +1,11 @@
 import React, { useEffect, useLayoutEffect } from "react";
 import { connect } from "react-redux";
-import { fetchDataFromUrl } from "../reducers";
+import { fetchDataFromUrl, handleDelete } from "../reducers";
 import { List, Text, Button } from "react-native-paper";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, Alert } from "react-native";
 
 
-function WithdrawalsScreen({ navigation, fetchData, withdrawals }) {
+function WithdrawalsScreen({ navigation, fetchData, withdrawals, deleteItem }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Withdrawals",
@@ -61,11 +61,14 @@ function WithdrawalsScreen({ navigation, fetchData, withdrawals }) {
               title={`${withdrawal?.name} - Ksh: ${withdrawal?.amount}`}
               description={withdrawal?.description}
               left={(props) => <List.Icon {...props} icon="cash-minus" />}
-              // onPress={() => {
-              //     navigation.navigate("transactionInputScreen", {
-              //         transactionId: withdrawal._id
-              //     })
-              // }}
+              right={(props) => <Button {...props} icon="delete" onPress={async () => {
+                try {
+                    await deleteItem(withdrawal._id, "withdrawals")
+                    Alert.alert("Success!", "Item deleted successfully");
+                } catch (error) {
+                    console.error(error);
+                }
+            }} />}
             />
           ))}
         </List.Section>
@@ -85,6 +88,9 @@ const mapDispatchToProps = (dispatch) => {
     fetchData: (url) => {
       dispatch(fetchDataFromUrl(url));
     },
+    deleteItem: (itemId, url) => {
+      dispatch(handleDelete(itemId, url))
+  },
   };
 };
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useLayoutEffect } from "react";
 import { connect } from "react-redux";
-import { fetchDataFromUrl } from "../reducers";
+import { fetchDataFromUrl, handleDelete } from "../reducers";
 import { List, Text, Button } from "react-native-paper";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, Alert } from "react-native";
 
-function DepositsScreen({ navigation, fetchData, deposits }) {
+function DepositsScreen({ navigation, fetchData, deposits, deleteItem }) {
   
     useLayoutEffect(() => {
     navigation.setOptions({
@@ -61,11 +61,14 @@ function DepositsScreen({ navigation, fetchData, deposits }) {
               title={`${deposit?.name} - Ksh: ${deposit?.amount}`}
               description={deposit?.description}
               left={(props) => <List.Icon {...props} icon="cash-plus" />}
-              // onPress={() => {
-              //     navigation.navigate("transactionInputScreen", {
-              //         transactionId: deposit._id
-              //     })
-              // }}
+              right={(props) => <Button {...props} icon="delete" onPress={async () => {
+                try {
+                    await deleteItem(deposit._id, "deposits")
+                    Alert.alert("Success!", "Item deleted successfully");
+                } catch (error) {
+                    console.error(error);
+                }
+            }} />}
             />
           ))}
         </List.Section>
@@ -85,6 +88,9 @@ const mapDispatchToProps = (dispatch) => {
     fetchData: (url) => {
       dispatch(fetchDataFromUrl(url));
     },
+    deleteItem: (itemId, url) => {
+      dispatch(handleDelete(itemId, url))
+  },
   };
 };
 

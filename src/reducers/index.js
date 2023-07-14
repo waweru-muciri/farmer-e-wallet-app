@@ -155,6 +155,7 @@ export function handleDelete(itemId, url) {
   //send request to server to delete selected item
   return async (dispatch) => {
     try {
+      console.log(itemId, url)
       await deleteDoc(doc(db, url, itemId))
       switch (url) {
         case "transactions":

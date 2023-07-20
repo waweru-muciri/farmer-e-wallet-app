@@ -113,32 +113,32 @@ export function productsFetchDataSuccess(products) {
         products,
     };
 }
-export function editAccount(account) {
+export function editUserProfile(userProfile) {
     return {
-        type: actionTypes.EDIT_ACCOUNT,
-        account,
+        type: actionTypes.EDIT_USER_PROFILE,
+        userProfile,
     };
 }
 
-export function addAccount(account) {
+export function addUserProfile(userProfile) {
     return {
-        type: actionTypes.ADD_ACCOUNT,
-        account,
+        type: actionTypes.ADD_USER_PROFILE,
+        userProfile,
     };
 }
 
-export function deleteAccount(accountId) {
+export function deleteUserProfile(userProfileId) {
     return {
-        type: actionTypes.DELETE_ACCOUNT,
-        accountId,
+        type: actionTypes.DELETE_USER_PROFILE,
+        userProfileId,
     };
 }
 
 
-export function accountsFetchDataSuccess(accounts) {
+export function userProfileFetchDataSuccess(userProfile) {
     return {
-        type: actionTypes.ACCOUNTS_FETCH_DATA_SUCCESS,
-        accounts,
+        type: actionTypes.USER_PROFILE_FETCH_DATA_SUCCESS,
+        userProfile,
     };
 }
 

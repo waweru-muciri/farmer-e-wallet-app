@@ -7,14 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { handleItemFormSubmit } from "../reducers";
-
-
-const defaultValues = {
-  first_name: "",
-  last_name: "",
-  phone_number: "",
-};
+import { updateUserProfile } from "../reducers";
 
 const schema = yup.object().shape({
   first_name: yup.string().required("First Name is required"),
@@ -22,12 +15,17 @@ const schema = yup.object().shape({
   last_name: yup.string().required("Last Name is required"),
 });
 
-function ProfileScreen({ navigation, fetchData, users }) {
+function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "User Profile",
     });
   }, []);
+  console.info(defaultValues);
+  const defaultValues = {
+    ...userProfile,
+    amount_in_account: `${userProfile.amount_in_account}`,
+  };
 
   const { colors } = useTheme();
   const {
@@ -39,10 +37,6 @@ function ProfileScreen({ navigation, fetchData, users }) {
     defaultValues,
     resolver: yupResolver(schema),
   });
-
-  useEffect(() => {
-    fetchData("loans");
-  }, []);
 
   return (
     <SafeAreaView
@@ -114,20 +108,20 @@ function ProfileScreen({ navigation, fetchData, users }) {
                 style={{
                   marginBottom: 10,
                 }}
-                error={errors.first_name ? true : false}
+                error={errors.last_name ? true : false}
               />
             )}
-            name="first_name"
+            name="last_name"
             rules={{ required: true }}
           />
-          {errors.first_name && (
+          {errors.last_name && (
             <Text
               variant="labelLarge"
               style={{
                 color: colors.error,
               }}
             >
-              {errors.first_name.message}
+              {errors.last_name.message}
             </Text>
           )}
           <Controller
@@ -158,15 +152,53 @@ function ProfileScreen({ navigation, fetchData, users }) {
               {errors.phone_number.message}
             </Text>
           )}
-
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Account Number"
+                mode="outlined"
+                editable={false}
+                onBlur={onBlur}
+                onChangeText={(value) => onChange(value)}
+                value={value}
+                style={{
+                  marginBottom: 10,
+                }}
+                error={errors.account_number ? true : false}
+              />
+            )}
+            name="account_number"
+            rules={{ required: true }}
+          />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Current Balance"
+                mode="outlined"
+                editable={false}
+                onBlur={onBlur}
+                onChangeText={(value) => onChange(value)}
+                value={value}
+                style={{
+                  marginBottom: 10,
+                }}
+                error={errors.amount_in_account ? true : false}
+              />
+            )}
+            name="amount_in_account"
+            rules={{ required: true }}
+          />
           <Button
             mode="contained"
             style={{
               alignSelf: "center",
               marginTop: 30,
             }}
-            onPress={handleSubmit((data) => {
-              submitForm(data, "users");
+            onPress={handleSubmit(async (data) => {
+              await updateUserInfo(userProfile.id, data);
+              Alert.alert("Success!", "Profile saved successfully");
             })}
           >
             Save Profile
@@ -179,18 +211,15 @@ function ProfileScreen({ navigation, fetchData, users }) {
 
 const mapStateToProps = (state) => {
   return {
-    users: state.users,
+    userProfile: state.auth.userProfile,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    fetchData: (url) => {
-      dispatch(fetchDataFromUrl(url));
+    updateUserInfo: (userId, userData) => {
+      dispatch(updateUserProfile(userId, userData));
     },
-    submitForm: (url, data) => {
-        dispatch(handleItemFormSubmit(url, data));
-      },
   };
 };
 

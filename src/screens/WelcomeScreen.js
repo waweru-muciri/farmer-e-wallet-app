@@ -10,8 +10,10 @@ import {
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { login } from '../reducers';
+import { login, setUserProfile } from '../reducers';
 import { AppStyles } from '../AppStyles';
+import { db } from '../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 
 function WelcomeScreen({ navigation }) {
   const auth = getAuth();
@@ -33,11 +35,18 @@ function WelcomeScreen({ navigation }) {
       password != null &&
       password.length > 0
     ) {
-      signInWithEmailAndPassword(auth, email, password)
+      await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in 
           const user = userCredential.user;
-          dispatch(login(user));
+          //get user profile stored in firestore 
+          getDoc(doc(db, "users", user.uid))
+            .then(docSnapshot => {
+              const userProfile = docSnapshot.data()
+              dispatch(login(userProfile));
+              dispatch(setUserProfile(userProfile));
+              setIsLoading(false);
+            })
           navigation.navigate('DrawerStack');
         })
         .catch((error) => {

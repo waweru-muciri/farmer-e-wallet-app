@@ -89,23 +89,23 @@ export function transactions(state = [], action) {
     }
 }
 
-export function accounts(state = [], action) {
+export function userProfile(state = {}, action) {
     switch (action.type) {
-        case actionTypes.ACCOUNTS_FETCH_DATA_SUCCESS:
-            return action.accounts;
+        case actionTypes.USER_PROFILE_FETCH_DATA_SUCCESS:
+            return action.userProfile;
 
-        case actionTypes.EDIT_ACCOUNT:
-            return state.map((account) =>
-                account._id === action.account._id
-                    ? Object.assign({}, account, action.account)
-                    : account
+        case actionTypes.EDIT_USER_PROFILE:
+            return state.map((userProfile) =>
+                userProfile._id === action.userProfile._id
+                    ? Object.assign({}, userProfile, action.userProfile)
+                    : userProfile
             );
 
-        case actionTypes.ADD_ACCOUNT:
-            return [...state, action.account];
+        case actionTypes.ADD_USER_PROFILE:
+            return [...state, action.userProfile];
 
-        case actionTypes.DELETE_ACCOUNT:
-            return state.filter((account) => account._id !== action.accountId);
+        case actionTypes.DELETE_USER_PROFILE:
+            return state.filter((userProfile) => userProfile._id !== action.userProfileId);
         default:
             return state;
     }

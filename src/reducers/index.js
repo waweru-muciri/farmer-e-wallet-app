@@ -5,14 +5,14 @@ import { doc, getDocs, deleteDoc, collection, updateDoc, addDoc } from "firebase
 import {
   addTransaction, transactionsFetchDataSuccess, deleteTransaction,
   editTransaction, editLoan, loansFetchDataSuccess, deleteWithdrawal, deleteProduct,
-  productsFetchDataSuccess, withdrawalsFetchDataSuccess, addWithdrawal, addProduct,
-  deleteAccount, accountsFetchDataSuccess, addAccount, editProduct, editAccount,
+  productsFetchDataSuccess, withdrawalsFetchDataSuccess, addWithdrawal, addProduct, editProduct,
   editWithdrawal, editDeposit, addDeposit, depositsFetchDataSuccess, deleteDeposit
 } from '../actions/actions';
-import { loans, transactions, products, withdrawals, accounts, deposits } from "./reducers"
+import { loans, transactions, products, withdrawals, userProfile, deposits } from "./reducers"
 
 const LOGIN = 'LOGIN';
 const LOGOUT = 'LOGOUT';
+const USER_PROFILE = 'USER_PROFILE';
 
 const initialAuthState = { isLoggedIn: false };
 
@@ -20,6 +20,11 @@ const initialAuthState = { isLoggedIn: false };
 export const login = (user) => ({
   type: LOGIN,
   user,
+});
+
+export const setUserProfile = (userProfile) => ({
+  type: USER_PROFILE,
+  userProfile,
 });
 
 export const logout = (user) => ({
@@ -30,6 +35,8 @@ function auth(state = initialAuthState, action) {
   switch (action.type) {
     case LOGIN:
       return { ...state, isLoggedIn: true, user: action.user };
+    case USER_PROFILE:
+      return { ...state, userProfile: action.userProfile };
     case LOGOUT:
       AsyncStorage.removeItem('@loggedInUserID:id');
       AsyncStorage.removeItem('@loggedInUserID:key');
@@ -40,14 +47,30 @@ function auth(state = initialAuthState, action) {
   }
 }
 
+export function updateUserProfile(userId, userData) {
+  return async (dispatch) => {
+    //send post request to edit the item
+    updateDoc(doc(db, "users", userId), userData)
+      .then((docRef) => {
+        let modifiedObject = Object.assign(
+          {},
+          data,
+        );
+        dispatch(setUserProfile(modifiedObject));
+      })
+  }
+}
+
 export function handleItemFormSubmit(data, url) {
+
   if (typeof data._id === "undefined") {
     delete data._id;
   }
   return async (dispatch) => {
+    const user_id = await AsyncStorage.getItem("@loggedInUserID:id")
     typeof data._id !== "undefined"
       ? //send post request to edit the item
-      updateDoc(doc(db, url, data._id), data)
+      updateDoc(doc(db, "users", user_id, url, data._id), data)
         .then((docRef) => {
           let modifiedObject = Object.assign(
             {},
@@ -63,9 +86,6 @@ export function handleItemFormSubmit(data, url) {
             case "products":
               dispatch(editProduct(modifiedObject));
               break;
-            case "accounts":
-              dispatch(editAccount(modifiedObject));
-              break;
             case "withdrawals":
               dispatch(editWithdrawal(modifiedObject));
               break;
@@ -79,7 +99,7 @@ export function handleItemFormSubmit(data, url) {
         }).finally(() => {
         })
       : //send post to create item
-      addDoc(collection(db, url), data)
+      addDoc(collection(db, "users", user_id, url), data)
         .then((docRef) => {
           let addedItem = Object.assign({}, data, {
             _id: docRef.id,
@@ -96,9 +116,6 @@ export function handleItemFormSubmit(data, url) {
               break;
             case "products":
               dispatch(addProduct(addedItem));
-              break;
-            case "accounts":
-              dispatch(addAccount(addedItem));
               break;
             case "deposits":
               dispatch(addDeposit(addedItem));
@@ -117,7 +134,14 @@ export function handleItemFormSubmit(data, url) {
 export function fetchDataFromUrl(url) {
   return async (dispatch) => {
     try {
-      const snapshot = await getDocs(collection(db, url))
+      const user_id = await AsyncStorage.getItem("@loggedInUserID:id")
+      let urlToFetchFrom;
+      if (url == "products") {
+        urlToFetchFrom = "products"
+      } else {
+        urlToFetchFrom = `users/${user_id}/${url}`
+      }
+      const snapshot = await getDocs(collection(db, urlToFetchFrom))
       const fetchedItems = snapshot.docs.map((doc) => {
         const fetchedObject = Object.assign({}, doc.data(),
           {
@@ -139,9 +163,6 @@ export function fetchDataFromUrl(url) {
         case "products":
           dispatch(productsFetchDataSuccess(fetchedItems));
           break;
-        case "accounts":
-          dispatch(accountsFetchDataSuccess(fetchedItems));
-          break;
         case "deposits":
           dispatch(depositsFetchDataSuccess(fetchedItems));
           break;
@@ -155,8 +176,8 @@ export function handleDelete(itemId, url) {
   //send request to server to delete selected item
   return async (dispatch) => {
     try {
-      console.log(itemId, url)
-      await deleteDoc(doc(db, url, itemId))
+      const user_id = await AsyncStorage.getItem("@loggedInUserID:id")
+      await deleteDoc(doc(db, "users", user_id, url, itemId))
       switch (url) {
         case "transactions":
           dispatch(deleteTransaction(itemId));
@@ -169,9 +190,6 @@ export function handleDelete(itemId, url) {
           break;
         case "products":
           dispatch(deleteProduct(itemId));
-          break;
-        case "accounts":
-          dispatch(deleteAccount(itemId));
           break;
         case "deposits":
           dispatch(deleteDeposit(itemId));
@@ -190,7 +208,7 @@ const AppReducer = combineReducers({
   loans,
   products,
   withdrawals,
-  accounts,
+  userProfile,
   deposits,
 });
 

@@ -27,32 +27,32 @@ export default function DrawerContainer({ navigation }) {
         <MenuButton
           title="Savings"
           onPress={() => {
-                navigation.navigate('Savings Screen');
+            navigation.navigate('Savings Screen');
           }}
         />
         <MenuButton
           title="Loans"
           onPress={() => {
-                navigation.navigate('Loans Screen');
+            navigation.navigate('Loans Screen');
           }}
         />
         <MenuButton
           title="Withdrawals"
           onPress={() => {
-                navigation.navigate('Withdrawals Screen');
+            navigation.navigate('Withdrawals Screen');
           }}
         />
         <MenuButton
           title="Profile"
           onPress={() => {
-                navigation.navigate('Profile Screen');
+            navigation.navigate('Profile Screen');
           }}
         />
         <MenuButton
           title="Log Out"
           source={AppIcon.images.logout}
-          onPress={() => {
-            signOut(auth)
+          onPress={async () => {
+            await signOut(auth)
               .then(() => {
                 dispatch(logout());
                 navigation.navigate('LoginStack');

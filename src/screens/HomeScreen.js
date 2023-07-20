@@ -1,9 +1,9 @@
 import React, { useLayoutEffect, useEffect } from 'react';
-import { Text, Card, Button } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { Dimensions, ScrollView, View, } from 'react-native';
 import { connect } from 'react-redux';
 import { fetchDataFromUrl } from "../reducers";
-import { PieChart } from "react-native-chart-kit";
+import { PieChart, LineChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const chartConfig = {
@@ -88,56 +88,87 @@ function HomeScreen({ navigation, user, accounts, fetchData, products,
 
   return (
     <SafeAreaView
-    style={{
-      flex: 1,
-    }}
-  >
-    <ScrollView>
-      <View
-        style={{
-          flex: 1,
-          padding: 20,
-          justifyContent: "center",
-        }}
-      >
-        <Text variant='titleLarge' style={{ fontWeight: "bold" }}> Welcome {user?.displayName}</Text>
+      style={{
+        flex: 1,
+      }}
+    >
+      <ScrollView>
         <View
           style={{
             flex: 1,
-            justifyContent: "space-between",
-            flexDirection: "row",
-            marginBottom: 10
-          }}>
-          <Text variant='titleLarge' style={{ fontWeight: "bold", textAlign: "center", margin: 10 }}> My accounts</Text>
-          <Button mode="elevated" style={{ alignSelf: 'center' }}
-            onPress={() => {
-              navigation.navigate("AccountInputScreen", {});
-            }}
-          >
-            Add Account
-          </Button>
+            padding: 20,
+            justifyContent: "center",
+          }}
+        >
+          <Text variant='titleLarge' style={{ fontWeight: "bold" }}> Welcome {user?.first_name}</Text>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "space-between",
+              flexDirection: "row",
+              marginBottom: 10
+            }}>
+            <Text variant='titleLarge' style={{ fontWeight: "bold", textAlign: "center", margin: 10 }}> My account</Text>
+          </View>
+          <View>
+            <PieChart data={pieChartData} chartConfig={chartConfig} accessor='value'
+              width={Dimensions.get("window").width} height={220}
+              backgroundColor={"transparent"}
+            />
+          </View>
+          <ScrollView horizontal>
+            <LineChart
+              data={{
+                labels: ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"],
+                datasets: [
+                  {
+                    data: [
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                      parseInt(Math.random() * 10) * 1000,
+                    ]
+                  }
+                ]
+              }}
+              width={Dimensions.get("window").width * 2} // from react-native
+              height={400}
+              yAxisLabel="Ksh"
+              yAxisInterval={1} // optional, defaults to 1
+              chartConfig={{
+                backgroundColor: "#e26a00",
+                backgroundGradientFrom: "#2a52be",
+                backgroundGradientTo: "#002D62",
+                decimalPlaces: 2, // optional, defaults to 2dp
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16
+                },
+                propsForDots: {
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: "#ffa726"
+                }
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16
+              }}
+            />
+          </ScrollView>
         </View>
-        {accounts.map((account) => (
-          <Card key={account._id} style={{ marginBottom: 15 }} onPress={() => {
-            navigation.navigate("AccountInputScreen", { accountId: account._id });
-          }}>
-            <Card.Cover source={{ uri: "https://picsum.photos/700" }} />
-            <Card.Title title={account.value} />
-            <Card.Content>
-              <Text variant="bodyMedium">Available Amount : {account.available_amount}</Text>
-              <Text variant="bodyMedium"> Account number : {account.account_number}</Text>
-              <Text variant="bodyMedium"> Account details : {account.description}</Text>
-            </Card.Content>
-          </Card>
-        ))}
-        <View>
-          <PieChart data={pieChartData} chartConfig={chartConfig} accessor='value'
-            width={Dimensions.get("window").width} height={220}
-            backgroundColor={"transparent"}
-          />
-        </View>
-      </View>
-    </ScrollView >
+      </ScrollView >
     </SafeAreaView >
   );
 }

@@ -4,14 +4,16 @@ import { AppStyles } from '../AppStyles';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useDispatch } from 'react-redux';
-import { login } from '../reducers';
+import { login, setUserProfile } from '../reducers';
 import { db } from '../firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function SignupScreen({ navigation }) {
   const auth = getAuth();
 
-  const [fullname, setFullname] = useState('');
-  const [phone, setPhone] = useState('');
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
+  const [phone_number, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -22,20 +24,25 @@ function SignupScreen({ navigation }) {
       .then((userCredential) => {
         const data = {
           email: email,
-          fullname: fullname,
-          phone: phone,
+          first_name: first_name,
+          last_name: last_name,
+          phone_number: phone_number,
         };
         // Signed in 
         const user = userCredential.user;
         const user_uid = user.uid;
+        //persist user data to async storage
+        AsyncStorage.setItem('@loggedInUserID:id', user_uid);
+        AsyncStorage.setItem('@loggedInUserID:key', email);
+        AsyncStorage.setItem('@loggedInUserID:password', password);
         //persist user details into firestore
-        setDoc(doc(db, "users", user_uid), data)
+        setDoc(doc(db, "users", user_uid), {...data, id: user_uid})
           .then(() => {
-            
+            dispatch(login(user));
+            dispatch(setUserProfile(user));
+            navigation.navigate('DrawerStack');
           })
           .catch(({ code, message }) => Alert.alert(message))
-        dispatch(login(user));
-        navigation.navigate('DrawerStack', { user });
 
       })
       .catch((error) => {
@@ -50,9 +57,19 @@ function SignupScreen({ navigation }) {
       <View style={styles.InputContainer}>
         <TextInput
           style={styles.body}
-          placeholder="Full Name"
-          onChangeText={setFullname}
-          value={fullname}
+          placeholder="First Name"
+          onChangeText={setFirstName}
+          value={first_name}
+          placeholderTextColor={AppStyles.color.grey}
+          underlineColorAndroid="transparent"
+        />
+      </View>
+      <View style={styles.InputContainer}>
+        <TextInput
+          style={styles.body}
+          placeholder="Last Name"
+          onChangeText={setLastName}
+          value={last_name}
           placeholderTextColor={AppStyles.color.grey}
           underlineColorAndroid="transparent"
         />
@@ -61,8 +78,8 @@ function SignupScreen({ navigation }) {
         <TextInput
           style={styles.body}
           placeholder="Phone Number"
-          onChangeText={setPhone}
-          value={phone}
+          onChangeText={setPhoneNumber}
+          value={phone_number}
           placeholderTextColor={AppStyles.color.grey}
           underlineColorAndroid="transparent"
         />

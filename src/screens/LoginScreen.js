@@ -12,7 +12,9 @@ import { AppStyles } from '../AppStyles';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { login } from '../reducers';
+import { setUserProfile, login } from '../reducers';
+import { db } from '../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 
 function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -22,20 +24,28 @@ function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
 
   const onPressLogin = () => {
-    if (email.length <= 0 || password.length <= 0) {
+    if (email.trim().length <= 0 || password.length <= 0) {
       Alert.alert('Please fill out the required fields.');
       return;
     }
-    signInWithEmailAndPassword(auth, email, password)
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword)
       .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
         const user_uid = user.uid;
         //persist user data to async storage
         AsyncStorage.setItem('@loggedInUserID:id', user_uid);
-        AsyncStorage.setItem('@loggedInUserID:key', email);
-        AsyncStorage.setItem('@loggedInUserID:password', password);
-        dispatch(login(user));
+        AsyncStorage.setItem('@loggedInUserID:key', trimmedEmail);
+        AsyncStorage.setItem('@loggedInUserID:password', trimmedPassword);
+        //get user profile stored in firestore 
+        getDoc(doc(db, "users", user.uid))
+        .then(docSnapshot => {
+          const userProfile = docSnapshot.data()
+          dispatch(login(userProfile));
+          dispatch(setUserProfile(userProfile));
+        }).catch(error => console.log(error))
         navigation.navigate('DrawerStack');
 
       })

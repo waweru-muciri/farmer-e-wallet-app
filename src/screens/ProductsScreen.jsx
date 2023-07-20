@@ -35,8 +35,8 @@ function ProductsScreen({ navigation, fetchData, products }) {
           }}
         >
           {products.map((product) => (
-            <Card key={product._id} style={{marginBottom: 15 }}>
-              <Card.Cover source={{ uri: "https://picsum.photos/700" }} />
+            <Card key={product._id} style={{ marginBottom: 15 }}>
+              <Card.Cover source={product.imageUrl || ""} />
               <Card.Title title={product.name} />
               <Card.Content>
                 <Text variant="bodyMedium">Price : {product.price}</Text>

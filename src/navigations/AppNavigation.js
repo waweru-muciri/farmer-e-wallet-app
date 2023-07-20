@@ -16,7 +16,6 @@ import LoanInputForm from '../screens/LoanInputForm';
 import WithdrawalsScreen from '../screens/WithdrawalsScreen';
 import WithdrawalsInputScreen from '../screens/WithdrawalsInputScreen';
 import ProductsScreen from '../screens/ProductsScreen';
-import AccountInputScreen from '../screens/AccountInputScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SavingsScreen from '../screens/SavingsScreen';
 import SavingsInputScreen from '../screens/SavingsInputScreen';
@@ -74,10 +73,6 @@ const HomeStack = () => (
     <Stack.Screen
       name="Profile Screen"
       component={ProfileScreen}
-    />
-    <Stack.Screen
-      name="AccountInputScreen"
-      component={AccountInputScreen}
     />
     <Stack.Screen
       name="Withdrawals Screen"

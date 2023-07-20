@@ -5,19 +5,16 @@ import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, TextInput, useTheme } from "react-native-paper";
-import { PaperSelect } from "react-native-paper-select";
-import { handleItemFormSubmit } from "../reducers";
+import { handleItemFormSubmit, updateUserProfile } from "../reducers";
 import { connect } from "react-redux";
 
 const defaultValues = {
-  account: "",
   name: "",
   description: "",
   amount: "",
 };
 
 const schema = yup.object().shape({
-  account: yup.object().required("Account is required"),
   name: yup.string().required("Name is required"),
   amount: yup
     .number()
@@ -26,7 +23,12 @@ const schema = yup.object().shape({
   description: yup.string().required("Description is required"),
 });
 
-const LoanInputForm = ({ navigation, accounts, submitForm }) => {
+const LoanInputForm = ({
+  navigation,
+  userProfile,
+  updateUserInfo,
+  submitForm,
+}) => {
   const { colors } = useTheme();
   const {
     control,
@@ -60,24 +62,6 @@ const LoanInputForm = ({ navigation, accounts, submitForm }) => {
             gap: 15,
           }}
         >
-          <Controller
-            control={control}
-            render={({ field: { value } }) => (
-              <PaperSelect
-                label="Select Account"
-                value={value?.value}
-                onSelection={(selectedValue) => {
-                  setValue("account", selectedValue.selectedList?.[0]);
-                }}
-                arrayList={[...accounts]}
-                selectedArrayList={[value]}
-                errorText={errors.account?.message}
-                multiEnable={false}
-              />
-            )}
-            name="account"
-            rules={{ required: true }}
-          />
           <Controller
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
@@ -175,21 +159,25 @@ const LoanInputForm = ({ navigation, accounts, submitForm }) => {
               marginTop: 30,
             }}
             onPress={handleSubmit(async (data) => {
-              const { account } = data;
               const dateOfBorrowing = new Date().toLocaleDateString();
               const loanToSave = {
                 ...data,
                 dateOfBorrowing,
               };
-              //JUST INCREASE THE AMOUNT IN THE SELECTED ACCOUNT AND ITS GOOD.
-              const updatedAccount = {
-                ...account,
-                available_amount:
-                  parseFloat(account.available_amount) + parseFloat(data.amount),
+              const CURRENT_AMOUNT_IN_ACCOUNT = parseFloat(
+                userProfile.amount_in_account
+              );
+              const BORROWED_AMOUNT = parseFloat(data.amount);
+              const TOTAL_AMOUNT_IN_ACCOUNT =
+                CURRENT_AMOUNT_IN_ACCOUNT + BORROWED_AMOUNT;
+              //JUST INCREASE THE AMOUNT IN THE ACCOUNT AND ITS GOOD.
+              const updatedProfile = {
+                ...userProfile,
+                amount_in_account: TOTAL_AMOUNT_IN_ACCOUNT,
               };
               try {
                 await submitForm(loanToSave, "loans");
-                await submitForm(updatedAccount, "accounts");
+                await updateUserInfo(userProfile.id, updatedProfile);
                 Alert.alert("Success!", "Item saved successfully");
                 navigation.goBack();
               } catch (error) {
@@ -207,7 +195,7 @@ const LoanInputForm = ({ navigation, accounts, submitForm }) => {
 
 const mapStateToProps = (state) => {
   return {
-    accounts: state.accounts,
+    userProfile: state.auth.user,
   };
 };
 
@@ -215,6 +203,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     submitForm: (url, data) => {
       dispatch(handleItemFormSubmit(url, data));
+    },
+    updateUserInfo: (userId, userData) => {
+      dispatch(updateUserProfile(userId, userData));
     },
   };
 };

@@ -1,22 +1,21 @@
 import React, { useLayoutEffect, useEffect, useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { connect } from 'react-redux';
-import { handleItemFormSubmit } from '../reducers';
+import { handleItemFormSubmit, updateUserProfile } from '../reducers';
 import { TextInput, Text, Button, useTheme } from 'react-native-paper';
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { PaperSelect } from "react-native-paper-select";
 import { fetchDataFromUrl } from "../reducers";
 
 
 const transactionSchema = yup.object().shape({
-    account: yup.object().required("Account is required"),
     quantity: yup.number().typeError("Quantity must be a number").required("Quantity is required"),
     description: yup.string(),
 });
 
-function TransactionInputScreen({ navigation, route, submitForm, products, accounts, fetchData }) {
+function TransactionInputScreen({ navigation, route, submitForm, products, userProfile,
+    updateUserInfo, fetchData }) {
     const { productId } = route.params;
     const { colors } = useTheme()
     const productToDisplay = products.find((product) => product._id == productId) || {}
@@ -94,24 +93,6 @@ function TransactionInputScreen({ navigation, route, submitForm, products, accou
                 )}
                 <Controller
                     control={control}
-                    render={({ field: { value } }) => (
-                        <PaperSelect
-                            label="Select Account"
-                            value={value?.value}
-                            onSelection={(selectedValue) => {
-                                setValue("account", selectedValue.selectedList?.[0]);
-                            }}
-                            arrayList={[...accounts]}
-                            selectedArrayList={[value]}
-                            errorText={errors.account?.message}
-                            multiEnable={false}
-                        />
-                    )}
-                    name="account"
-                    rules={{ required: true }}
-                />
-                <Controller
-                    control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
                             label="Transaction Description"
@@ -137,14 +118,19 @@ function TransactionInputScreen({ navigation, route, submitForm, products, accou
                             product, description, quantity, transaction_date, account
                         }
                         //JUST DECREASE THE AMOUNT IN THE SELECTED ACCOUNT AND ITS GOOD.
-                        const updatedAccount = {
-                            ...account,
-                            available_amount:
-                                parseFloat(account.available_amount) - (parseFloat(product.price) * parseInt(quantity)),
-                        };
+                        const CURRENT_AMOUNT_IN_ACCOUNT = parseFloat(
+                            userProfile.amount_in_account
+                          );
+                          const PRODUCT_COST = (parseFloat(product.price) * parseInt(quantity));
+                          const TOTAL_AMOUNT_IN_ACCOUNT =
+                            CURRENT_AMOUNT_IN_ACCOUNT - PRODUCT_COST;
+                          const updatedProfile = {
+                            ...userProfile,
+                            amount_in_account: TOTAL_AMOUNT_IN_ACCOUNT,
+                          };
                         try {
                             submitForm(transactionToSave, "transactions")
-                            submitForm(updatedAccount, "accounts")
+                            await updateUserInfo(userProfile.id, updatedProfile);
                             Alert.alert("Success!", "Item saved successfully");
                             navigation.goBack();
                         } catch (error) {
@@ -163,7 +149,7 @@ function TransactionInputScreen({ navigation, route, submitForm, products, accou
 const mapStateToProps = (state) => {
     return {
         products: state.products,
-        accounts: state.accounts,
+        userProfile: state.auth.user,
     }
 };
 
@@ -174,6 +160,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         fetchData: (url) => {
             dispatch(fetchDataFromUrl(url));
+        },
+        updateUserInfo: (userId, userData) => {
+            dispatch(updateUserProfile(userId, userData));
         },
     }
 }

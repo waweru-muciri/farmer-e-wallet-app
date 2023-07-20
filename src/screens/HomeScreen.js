@@ -100,7 +100,7 @@ function HomeScreen({ navigation, user, accounts, fetchData, products,
             justifyContent: "center",
           }}
         >
-          <Text variant='titleLarge' style={{ fontWeight: "bold" }}> Welcome {user?.first_name}</Text>
+          <Text variant='titleLarge' style={{ fontWeight: "bold" }}> Welcome, {user?.first_name}</Text>
           <View
             style={{
               flex: 1,

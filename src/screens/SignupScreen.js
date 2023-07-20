@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, TextInput, View, TouchableOpacity } from 'react-native';
 import { AppStyles } from '../AppStyles';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { login, setUserProfile } from '../reducers';
 import { db } from '../firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Button, Switch, Text } from 'react-native-paper';
 
 function SignupScreen({ navigation }) {
   const auth = getAuth();
@@ -16,6 +17,7 @@ function SignupScreen({ navigation }) {
   const [phone_number, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdmin, toggleIsAdminSwitch] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -27,6 +29,7 @@ function SignupScreen({ navigation }) {
           first_name: first_name,
           last_name: last_name,
           phone_number: phone_number,
+          isAdmin: isAdmin,
         };
         // Signed in 
         const user = userCredential.user;
@@ -36,7 +39,7 @@ function SignupScreen({ navigation }) {
         AsyncStorage.setItem('@loggedInUserID:key', email);
         AsyncStorage.setItem('@loggedInUserID:password', password);
         //persist user details into firestore
-        setDoc(doc(db, "users", user_uid), {...data, id: user_uid})
+        setDoc(doc(db, "users", user_uid), { ...data, id: user_uid })
           .then(() => {
             dispatch(login(user));
             dispatch(setUserProfile(user));
@@ -105,11 +108,18 @@ function SignupScreen({ navigation }) {
           underlineColorAndroid="transparent"
         />
       </View>
-      <TouchableOpacity
+      <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", padding: 20 }}>
+        <Text>Is User Admin</Text>
+        <Text>
+          <Switch value={isAdmin} onValueChange={(value) => toggleIsAdminSwitch(!isAdmin)} />;
+        </Text>
+      </View>
+      <Button
+        mode='contained'
         style={[styles.facebookContainer, { marginTop: 50 }]}
         onPress={() => onRegister()}>
-        <Text style={styles.facebookText}>Sign Up</Text>
-      </TouchableOpacity>
+        Sign Up
+      </Button>
     </View>
   );
 }

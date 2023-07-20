@@ -5,8 +5,10 @@ import { AppIcon } from '../AppStyles';
 import { getAuth, signOut } from "firebase/auth";
 import { useDispatch } from 'react-redux';
 import { logout } from '../reducers';
+import { connect } from "react-redux";
 
-export default function DrawerContainer({ navigation }) {
+export function DrawerContainer({ navigation, userProfile }) {
+
   const auth = getAuth();
   const dispatch = useDispatch();
   return (
@@ -48,6 +50,15 @@ export default function DrawerContainer({ navigation }) {
             navigation.navigate('Profile Screen');
           }}
         />
+        {
+          userProfile?.isAdmin &&
+          <MenuButton
+            title="Users"
+            onPress={() => {
+              navigation.navigate('UsersScreen');
+            }}
+          />
+        }
         <MenuButton
           title="Log Out"
           source={AppIcon.images.logout}
@@ -77,3 +88,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 });
+
+const mapStateToProps = (state) => {
+  return {
+    userProfile: state.auth.user,
+  };
+};
+
+
+export default connect(mapStateToProps)(DrawerContainer);

@@ -135,10 +135,10 @@ export function deleteUserProfile(userProfileId) {
 }
 
 
-export function userProfileFetchDataSuccess(userProfile) {
+export function usersFetchDataSuccess(users) {
     return {
-        type: actionTypes.USER_PROFILE_FETCH_DATA_SUCCESS,
-        userProfile,
+        type: actionTypes.USERS_FETCH_DATA_SUCCESS,
+        users,
     };
 }
 

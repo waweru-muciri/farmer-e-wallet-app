@@ -5,7 +5,7 @@ import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, useTheme } from "react-native-paper";
 
-function ProductsScreen({ navigation, fetchData, products }) {
+function ProductsScreen({ navigation, fetchData, products, userProfile }) {
   const { colors } = useTheme();
 
   useLayoutEffect(() => {
@@ -34,9 +34,27 @@ function ProductsScreen({ navigation, fetchData, products }) {
             gap: 15,
           }}
         >
+          <View
+            style={{
+              flex: 1,
+              marginBottom: 10,
+            }}
+          >
+            {userProfile?.isAdmin && (
+              <Button
+                mode="outlined"
+                icon={"plus"}
+                onPress={() => {
+                  navigation.navigate("AddProductScreen");
+                }}
+              >
+                Add Product
+              </Button>
+            )}
+          </View>
           {products.map((product) => (
             <Card key={product._id} style={{ marginBottom: 15 }}>
-              <Card.Cover source={product.imageUrl || ""} />
+              <Card.Cover source={{ uri: product.product_image_url}} />
               <Card.Title title={product.name} />
               <Card.Content>
                 <Text variant="bodyMedium">Price : {product.price}</Text>
@@ -64,6 +82,7 @@ function ProductsScreen({ navigation, fetchData, products }) {
 const mapStateToProps = (state) => {
   return {
     products: state.products,
+    userProfile: state.auth.user,
   };
 };
 

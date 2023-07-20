@@ -1,15 +1,15 @@
 import React from 'react';
-import {Image, Pressable, StyleSheet} from 'react-native';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import { Image, Pressable, StyleSheet } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import TransactionInputScreen from '../screens/TransactionInputScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
-import {AppIcon, AppStyles} from '../AppStyles';
+import { AppIcon, AppStyles } from '../AppStyles';
 import DrawerContainer from '../components/DrawerContainer';
 import LoansScreen from '../screens/LoansScreen';
 import LoanInputForm from '../screens/LoanInputForm';
@@ -19,6 +19,9 @@ import ProductsScreen from '../screens/ProductsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SavingsScreen from '../screens/SavingsScreen';
 import SavingsInputScreen from '../screens/SavingsInputScreen';
+import UsersScreen from '../screens/UsersScreen';
+import AddMoneyToUserAccountScreen from '../screens/AddMoneyToUserAccountScreen';
+import ProductInputForm from '../screens/ProductInputForm';
 
 const Stack = createStackNavigator();
 
@@ -34,7 +37,7 @@ const LoginStack = () => (
     <Stack.Screen name="Welcome" component={WelcomeScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Signup" component={SignupScreen} />
-    
+
   </Stack.Navigator>
 );
 
@@ -49,13 +52,13 @@ const HomeStack = () => (
     <Stack.Screen
       name="Home"
       component={HomeScreen}
-      options={({navigation}) => ({
+      options={({ navigation }) => ({
         headerLeft: () => (
           <Pressable onPress={() => navigation.openDrawer()}>
             <Image style={styles.iconStyle} source={AppIcon.images.menu} />
           </Pressable>
         ),
-        headerLeftContainerStyle: {paddingLeft: 10},
+        headerLeftContainerStyle: { paddingLeft: 10 },
       })}
     />
     <Stack.Screen
@@ -98,6 +101,18 @@ const HomeStack = () => (
       name="TransactionInputScreen"
       component={TransactionInputScreen}
     />
+    <Stack.Screen
+      name="UsersScreen"
+      component={UsersScreen}
+    />
+    <Stack.Screen
+      name="AddMoneyToUserAccountScreen"
+      component={AddMoneyToUserAccountScreen}
+    />
+    <Stack.Screen
+      name="AddProductScreen"
+      component={ProductInputForm}
+    />
   </Stack.Navigator>
 );
 
@@ -107,11 +122,11 @@ const Drawer = createDrawerNavigator();
 const DrawerStack = () => (
   <Drawer.Navigator
     screenOptions={{
-      drawerStyle: {outerWidth: 200},
+      drawerStyle: { outerWidth: 200 },
       drawerPosition: 'left',
       headerShown: false,
     }}
-    drawerContent={({navigation}) => (
+    drawerContent={({ navigation }) => (
       <DrawerContainer navigation={navigation} />
     )}>
     <Drawer.Screen name="HomeStack" component={HomeStack} />
@@ -122,7 +137,7 @@ const DrawerStack = () => (
 const RootNavigator = () => (
   <Stack.Navigator
     initialRouteName="LoginStack"
-    screenOptions={{headerShown: false}}>
+    screenOptions={{ headerShown: false }}>
     <Stack.Screen name="LoginStack" component={LoginStack} />
     <Stack.Screen name="DrawerStack" component={DrawerStack} />
   </Stack.Navigator>
@@ -141,7 +156,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     color: 'black',
   },
-  iconStyle: {tintColor: AppStyles.color.tint, width: 30, height: 30},
+  iconStyle: { tintColor: AppStyles.color.tint, width: 30, height: 30 },
 });
 
 export default AppNavigator;

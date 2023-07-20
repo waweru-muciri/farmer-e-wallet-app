@@ -89,10 +89,10 @@ export function transactions(state = [], action) {
     }
 }
 
-export function userProfile(state = {}, action) {
+export function users(state = [], action) {
     switch (action.type) {
-        case actionTypes.USER_PROFILE_FETCH_DATA_SUCCESS:
-            return action.userProfile;
+        case actionTypes.USERS_FETCH_DATA_SUCCESS:
+            return action.users;
 
         case actionTypes.EDIT_USER_PROFILE:
             return state.map((userProfile) =>

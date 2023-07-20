@@ -9,15 +9,19 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { updateUserProfile } from "../reducers";
 
 const schema = yup.object().shape({
-  first_name: yup.string().required("First Name is required"),
-  phone_number: yup.string().required("Phone Number is required"),
-  last_name: yup.string().required("Last Name is required"),
+  amount_to_add_to_user_account: yup
+    .number()
+    .typeError("Amount must be a number")
+    .required("Amount is required"),
 });
 
-function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
+function ProfileScreen({ navigation, users, route, updateUserInfo }) {
+  const { userId } = route.params;
+  const userProfile = users.find((user) => user._id === userId) || {};
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "User Profile",
+      title: "Add Money to User Account",
     });
   }, []);
   const defaultValues = {
@@ -30,7 +34,6 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     defaultValues,
     resolver: yupResolver(schema),
@@ -71,6 +74,7 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               <TextInput
                 label="First Name"
                 mode="outlined"
+                editable={false}
                 onBlur={onBlur}
                 onChangeText={(value) => onChange(value)}
                 value={value}
@@ -84,21 +88,12 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
             name="first_name"
             rules={{ required: true }}
           />
-          {errors.first_name && (
-            <Text
-              variant="labelLarge"
-              style={{
-                color: colors.error,
-              }}
-            >
-              {errors.first_name.message}
-            </Text>
-          )}
           <Controller
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 label="Last Name"
+                editable={false}
                 mode="outlined"
                 onBlur={onBlur}
                 onChangeText={(value) => onChange(value)}
@@ -110,18 +105,7 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               />
             )}
             name="last_name"
-            rules={{ required: true }}
           />
-          {errors.last_name && (
-            <Text
-              variant="labelLarge"
-              style={{
-                color: colors.error,
-              }}
-            >
-              {errors.last_name.message}
-            </Text>
-          )}
           <Controller
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
@@ -129,6 +113,7 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
                 label="Phone Number"
                 mode="outlined"
                 onBlur={onBlur}
+                editable={false}
                 onChangeText={(value) => onChange(value)}
                 value={value}
                 style={{
@@ -138,18 +123,7 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               />
             )}
             name="phone_number"
-            rules={{ required: true }}
           />
-          {errors.phone_number && (
-            <Text
-              variant="labelLarge"
-              style={{
-                color: colors.error,
-              }}
-            >
-              {errors.phone_number.message}
-            </Text>
-          )}
           <Controller
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
@@ -167,7 +141,6 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               />
             )}
             name="account_number"
-            rules={{ required: true }}
           />
           <Controller
             control={control}
@@ -186,8 +159,35 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               />
             )}
             name="amount_in_account"
+          />
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label="Amount to Add"
+                mode="outlined"
+                onBlur={onBlur}
+                onChangeText={(value) => onChange(value)}
+                value={value}
+                style={{
+                  marginBottom: 10,
+                }}
+                error={errors.amount_to_add_to_user_account ? true : false}
+              />
+            )}
+            name="amount_to_add_to_user_account"
             rules={{ required: true }}
           />
+          {errors.amount_to_add_to_user_account && (
+            <Text
+              variant="labelLarge"
+              style={{
+                color: colors.error,
+              }}
+            >
+              {errors.amount_to_add_to_user_account.message}
+            </Text>
+          )}
           <Button
             mode="contained"
             style={{
@@ -195,11 +195,18 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
               marginTop: 30,
             }}
             onPress={handleSubmit(async (data) => {
-              await updateUserInfo(userProfile.id, data);
-              Alert.alert("Success!", "Profile saved successfully");
+              const updatedUserInfo = {
+                ...data,
+                amount_in_account:
+                  parseFloat(data.amount_in_account) +
+                  parseFloat(data.amount_to_add_to_user_account),
+              };
+              await updateUserInfo(userProfile.id, updatedUserInfo);
+              Alert.alert("Success!", "Amount added successfully");
+              navigation.goBack();
             })}
           >
-            Save Profile
+            Add Amount
           </Button>
         </View>
       </ScrollView>
@@ -209,7 +216,7 @@ function ProfileScreen({ navigation, userProfile, updateUserInfo }) {
 
 const mapStateToProps = (state) => {
   return {
-    userProfile: state.auth.userProfile,
+    users: state.users,
   };
 };
 

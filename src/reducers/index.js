@@ -2,13 +2,14 @@ import { combineReducers } from 'redux';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { db } from '../firebaseConfig';
 import { doc, getDocs, deleteDoc, collection, updateDoc, addDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   addTransaction, transactionsFetchDataSuccess, deleteTransaction,
   editTransaction, editLoan, loansFetchDataSuccess, deleteWithdrawal, deleteProduct,
   productsFetchDataSuccess, withdrawalsFetchDataSuccess, addWithdrawal, addProduct, editProduct,
-  editWithdrawal, editDeposit, addDeposit, depositsFetchDataSuccess, deleteDeposit
+  editWithdrawal, editDeposit, addDeposit, depositsFetchDataSuccess, deleteDeposit, usersFetchDataSuccess
 } from '../actions/actions';
-import { loans, transactions, products, withdrawals, userProfile, deposits } from "./reducers"
+import { loans, transactions, products, withdrawals, userProfile, deposits, users } from "./reducers"
 
 const LOGIN = 'LOGIN';
 const LOGOUT = 'LOGOUT';
@@ -38,10 +39,12 @@ function auth(state = initialAuthState, action) {
     case USER_PROFILE:
       return { ...state, userProfile: action.userProfile };
     case LOGOUT:
-      AsyncStorage.removeItem('@loggedInUserID:id');
-      AsyncStorage.removeItem('@loggedInUserID:key');
-      AsyncStorage.removeItem('@loggedInUserID:password');
-      return { ...state, isLoggedIn: false, user: {} };
+      return async () => {
+        await AsyncStorage.removeItem('@loggedInUserID:id');
+        await AsyncStorage.removeItem('@loggedInUserID:key');
+        await AsyncStorage.removeItem('@loggedInUserID:password');
+        return { ...state, isLoggedIn: false, user: {}, userProfile: {} };
+      }
     default:
       return state;
   }
@@ -59,6 +62,32 @@ export function updateUserProfile(userId, userData) {
         dispatch(setUserProfile(modifiedObject));
       })
   }
+}
+
+export async function uploadImageAsync(uri) {
+  // Why are we using XMLHttpRequest? See:
+  // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      console.log(e);
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+
+  const fileRef = ref(getStorage(), "product_images");
+  const result = await uploadBytes(fileRef, blob);
+
+  // We're done with the blob, close and release it
+  blob.close();
+
+  return await getDownloadURL(fileRef);
 }
 
 export function handleItemFormSubmit(data, url) {
@@ -99,7 +128,7 @@ export function handleItemFormSubmit(data, url) {
         }).finally(() => {
         })
       : //send post to create item
-      addDoc(collection(db, "users", user_id, url), data)
+      addDoc(url == "products" ? collection(db, "products") : collection(db, "users", user_id, url), data)
         .then((docRef) => {
           let addedItem = Object.assign({}, data, {
             _id: docRef.id,
@@ -138,7 +167,11 @@ export function fetchDataFromUrl(url) {
       let urlToFetchFrom;
       if (url == "products") {
         urlToFetchFrom = "products"
-      } else {
+      }
+      else if (url == "users") {
+        urlToFetchFrom = "users"
+      }
+      else {
         urlToFetchFrom = `users/${user_id}/${url}`
       }
       const snapshot = await getDocs(collection(db, urlToFetchFrom))
@@ -156,6 +189,9 @@ export function fetchDataFromUrl(url) {
           break;
         case "loans":
           dispatch(loansFetchDataSuccess(fetchedItems));
+          break;
+        case "users":
+          dispatch(usersFetchDataSuccess(fetchedItems));
           break;
         case "withdrawals":
           dispatch(withdrawalsFetchDataSuccess(fetchedItems));
@@ -208,8 +244,8 @@ const AppReducer = combineReducers({
   loans,
   products,
   withdrawals,
-  userProfile,
   deposits,
+  users,
 });
 
 export default AppReducer;
